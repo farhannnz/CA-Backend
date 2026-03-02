@@ -18,7 +18,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/clients', require('./routes/clientRoutes'));
 app.use('/api/documents', require('./routes/documentRoutes'));
-app.use('/webhook', require('./routes/webhookRoutes'));
+app.use('/api/webhook', require('./routes/webhookRoutes'));
 
 // Health check
 app.get('/', (req, res) => {
