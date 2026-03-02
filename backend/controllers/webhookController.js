@@ -6,7 +6,7 @@ const Document = require('../models/Document');
 exports.handleWhatsAppMessage = async (req, res) => {
   try {
     const twiml = new twilio.twiml.MessagingResponse();
-    
+
     // Extract message details
     const incomingMessage = req.body.Body?.trim();
     const fromNumber = req.body.From?.replace('whatsapp:', '');
@@ -19,8 +19,14 @@ exports.handleWhatsAppMessage = async (req, res) => {
     }
 
     // Find client by WhatsApp number
-    const client = await Client.findOne({ 
-      whatsappNumber: { $regex: fromNumber, $options: 'i' } 
+    // Escape special regex characters in phone number
+    const escapedNumber = fromNumber.replace(/[+\-()]/g, '\\$&');
+    const client = await Client.findOne({
+      $or: [
+        { whatsappNumber: fromNumber },
+        { whatsappNumber: `+${fromNumber}` },
+        { whatsappNumber: { $regex: escapedNumber, $options: 'i' } }
+      ]
     });
 
     if (!client) {
@@ -30,7 +36,7 @@ exports.handleWhatsAppMessage = async (req, res) => {
 
     // Parse message format: "ITR 2025-26" or "GST 2024-25"
     const messageParts = incomingMessage.split(/\s+/);
-    
+
     if (messageParts.length < 2) {
       twiml.message('Invalid format. Please send: DOCUMENT_TYPE YEAR\nExample: ITR 2025-26');
       return res.type('text/xml').send(twiml.toString());
@@ -69,7 +75,7 @@ exports.handleWhatsAppMessage = async (req, res) => {
 
 // Test endpoint to verify webhook is working
 exports.testWebhook = (req, res) => {
-  res.json({ 
+  res.json({
     message: 'Webhook is working',
     timestamp: new Date().toISOString()
   });
