@@ -57,10 +57,9 @@ exports.handleWhatsAppMessage = async (req, res) => {
       return res.type('text/xml').send(twiml.toString());
     }
 
-    // Send document
-    const message = twiml.message();
-    message.body(`Here is your ${documentType} for ${year}:`);
-    message.media(document.fileUrl);
+    // Send document link (more reliable than media)
+    const responseText = `Here is your ${documentType} for ${year}:\n\n${document.fileUrl}`;
+    twiml.message(responseText);
 
     console.log('Sending document:', document.fileUrl);
 
