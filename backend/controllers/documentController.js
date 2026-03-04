@@ -1,6 +1,6 @@
 const Document = require('../models/Document');
 const Client = require('../models/Client');
-const path = require('path');
+const { uploadToSupabase } = require('../middleware/supabaseUpload');
 
 // Upload document
 exports.uploadDocument = async (req, res) => {
@@ -21,18 +21,14 @@ exports.uploadDocument = async (req, res) => {
       return res.status(404).json({ error: 'Client not found' });
     }
 
-    // Generate public URL from Cloudinary
-    // Cloudinary raw files need .pdf extension in URL
-    let fileUrl = req.file.path;
-    
-    // If URL doesn't have extension, construct proper URL
-    if (!fileUrl.includes('.pdf')) {
-      // Extract parts from Cloudinary URL
-      const urlParts = fileUrl.split('/upload/');
-      if (urlParts.length === 2) {
-        fileUrl = `${urlParts[0]}/upload/${urlParts[1]}.pdf`;
-      }
-    }
+    // Upload to Supabase
+    const fileUrl = await uploadToSupabase(
+      req.file,
+      req.userId,
+      clientId,
+      year,
+      documentType
+    );
 
     const document = new Document({
       clientId,
@@ -50,6 +46,7 @@ exports.uploadDocument = async (req, res) => {
       document
     });
   } catch (error) {
+    console.error('Upload error:', error);
     res.status(500).json({ error: error.message });
   }
 };

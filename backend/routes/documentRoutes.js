@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const documentController = require('../controllers/documentController');
 const auth = require('../middleware/auth');
-const upload = require('../middleware/upload');
+const { upload } = require('../middleware/supabaseUpload');
 
 router.post('/', auth, upload.single('document'), documentController.uploadDocument);
 router.get('/', auth, documentController.getAllDocuments);
