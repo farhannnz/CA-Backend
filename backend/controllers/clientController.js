@@ -75,3 +75,27 @@ exports.deleteClient = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+// Update client
+exports.updateClient = async (req, res) => {
+  try {
+    const { consultantPhone } = req.body;
+
+    const client = await Client.findOneAndUpdate(
+      { _id: req.params.id, createdBy: req.userId },
+      { consultantPhone },
+      { new: true }
+    );
+
+    if (!client) {
+      return res.status(404).json({ error: 'Client not found' });
+    }
+
+    res.json({
+      message: 'Client updated successfully',
+      client
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
