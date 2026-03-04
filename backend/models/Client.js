@@ -18,6 +18,11 @@ const clientSchema = new mongoose.Schema({
       message: 'Invalid WhatsApp number format'
     }
   },
+  consultantPhone: {
+    type: String,
+    trim: true,
+    default: ''
+  },
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',

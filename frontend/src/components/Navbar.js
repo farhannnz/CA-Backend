@@ -4,6 +4,7 @@ import './Navbar.css';
 
 function Navbar({ onLogout }) {
   const navigate = useNavigate();
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
 
   const handleLogout = () => {
     onLogout();
@@ -17,8 +18,10 @@ function Navbar({ onLogout }) {
       </div>
       <div className="navbar-links">
         <Link to="/dashboard">Dashboard</Link>
+        <Link to="/clients">Clients</Link>
         <Link to="/add-client">Add Client</Link>
         <Link to="/upload-document">Upload Document</Link>
+        <span className="user-name">👤 {user.name || 'CA User'}</span>
         <button onClick={handleLogout} className="logout-btn">Logout</button>
       </div>
     </nav>

@@ -4,7 +4,7 @@ import { addClient } from '../api';
 import './Form.css';
 
 function AddClient() {
-  const [formData, setFormData] = useState({ name: '', whatsappNumber: '' });
+  const [formData, setFormData] = useState({ name: '', whatsappNumber: '', consultantPhone: '' });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
@@ -54,6 +54,16 @@ function AddClient() {
               required
             />
             <small>Include country code (e.g., +91 for India)</small>
+          </div>
+          <div className="form-group">
+            <label>Consultant Phone (Optional)</label>
+            <input
+              type="tel"
+              placeholder="+919876543210"
+              value={formData.consultantPhone}
+              onChange={(e) => setFormData({ ...formData, consultantPhone: e.target.value })}
+            />
+            <small>Phone number clients can contact for queries</small>
           </div>
           <div className="form-actions">
             <button type="button" onClick={() => navigate('/dashboard')} className="btn-secondary">

@@ -1,0 +1,224 @@
+.clients-container {
+  padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.clients-header {
+  margin-bottom: 30px;
+}
+
+.clients-header h1 {
+  color: #2c3e50;
+  margin-bottom: 20px;
+}
+
+.filter-buttons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  padding: 10px 20px;
+  border: 2px solid #3498db;
+  background: white;
+  color: #3498db;
+  border-radius: 25px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s;
+}
+
+.filter-btn:hover {
+  background: #ecf0f1;
+}
+
+.filter-btn.active {
+  background: #3498db;
+  color: white;
+}
+
+.clients-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 20px;
+}
+
+.client-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.client-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+
+.client-header {
+  border-bottom: 2px solid #ecf0f1;
+  padding-bottom: 15px;
+  margin-bottom: 15px;
+}
+
+.client-header h3 {
+  color: #2c3e50;
+  margin: 0 0 8px 0;
+  font-size: 1.3em;
+}
+
+.client-phone {
+  color: #7f8c8d;
+  font-size: 0.9em;
+}
+
+.client-stats {
+  margin-bottom: 15px;
+}
+
+.stat {
+  display: inline-block;
+  background: #e8f4f8;
+  color: #3498db;
+  padding: 8px 15px;
+  border-radius: 20px;
+  font-size: 0.9em;
+  font-weight: 600;
+}
+
+.documents-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.document-item {
+  background: #f8f9fa;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.doc-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.doc-type {
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 1em;
+}
+
+.doc-year {
+  color: #7f8c8d;
+  font-size: 0.85em;
+}
+
+.doc-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.view-btn, .delete-btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85em;
+  transition: all 0.2s;
+}
+
+.view-btn {
+  background: #3498db;
+  color: white;
+  text-decoration: none;
+}
+
+.view-btn:hover {
+  background: #2980b9;
+}
+
+.delete-btn {
+  background: #e74c3c;
+  color: white;
+}
+
+.delete-btn:hover {
+  background: #c0392b;
+}
+
+.no-docs {
+  text-align: center;
+  color: #95a5a6;
+  padding: 20px;
+  font-style: italic;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.empty-state h2 {
+  color: #2c3e50;
+  margin-bottom: 10px;
+}
+
+.empty-state p {
+  color: #7f8c8d;
+  margin-bottom: 20px;
+}
+
+.add-client-btn {
+  padding: 12px 30px;
+  background: #27ae60;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.add-client-btn:hover {
+  background: #229954;
+}
+
+.loading {
+  text-align: center;
+  padding: 60px;
+  font-size: 1.2em;
+  color: #7f8c8d;
+}
+
+@media (max-width: 768px) {
+  .clients-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .filter-buttons {
+    justify-content: center;
+  }
+  
+  .document-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .doc-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
