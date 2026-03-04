@@ -12,17 +12,16 @@ cloudinary.config({
 // Configure Cloudinary storage
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
-  params: {
-    folder: (req, file) => {
-      const { clientId, year } = req.body;
-      return `ca-documents/${req.userId}/${clientId}/${year}`;
-    },
-    resource_type: 'raw', // For PDFs and other non-image files
-    format: 'pdf', // Add PDF format
-    public_id: (req, file) => {
-      const { documentType } = req.body;
-      return `${documentType}_${Date.now()}.pdf`; // Add .pdf extension here
-    }
+  params: async (req, file) => {
+    const { clientId, year, documentType } = req.body;
+    return {
+      folder: `ca-documents/${req.userId}/${clientId}/${year}`,
+      resource_type: 'raw',
+      public_id: `${documentType}_${Date.now()}`,
+      format: 'pdf', // This ensures .pdf extension
+      use_filename: true,
+      unique_filename: false
+    };
   }
 });
 

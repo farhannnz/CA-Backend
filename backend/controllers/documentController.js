@@ -22,10 +22,16 @@ exports.uploadDocument = async (req, res) => {
     }
 
     // Generate public URL from Cloudinary
-    // Add .pdf extension if not present
+    // Cloudinary raw files need .pdf extension in URL
     let fileUrl = req.file.path;
-    if (!fileUrl.endsWith('.pdf')) {
-      fileUrl = fileUrl + '.pdf';
+    
+    // If URL doesn't have extension, construct proper URL
+    if (!fileUrl.includes('.pdf')) {
+      // Extract parts from Cloudinary URL
+      const urlParts = fileUrl.split('/upload/');
+      if (urlParts.length === 2) {
+        fileUrl = `${urlParts[0]}/upload/${urlParts[1]}.pdf`;
+      }
     }
 
     const document = new Document({
