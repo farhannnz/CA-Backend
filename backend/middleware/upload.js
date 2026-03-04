@@ -1,45 +1,40 @@
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
 
-// Configure storage
-const storage = multer.diskStorage({
-  destination: function(req, file, cb) {
-    const { clientId, year } = req.body;
-    const caId = req.userId;
-    
-    // Create directory structure: uploads/caId/clientId/year/
-    const uploadPath = path.join('uploads', caId.toString(), clientId, year);
-    
-    // Create directories if they don't exist
-    fs.mkdirSync(uploadPath, { recursive: true });
-    
-    cb(null, uploadPath);
-  },
-  filename: function(req, file, cb) {
-    const { documentType } = req.body;
-    const timestamp = Date.now();
-    const ext = path.extname(file.originalname);
-    const filename = `${documentType}_${timestamp}${ext}`;
-    cb(null, filename);
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+// Configure Cloudinary storage
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: (req, file) => {
+      const { clientId, year } = req.body;
+      return `ca-documents/${req.userId}/${clientId}/${year}`;
+    },
+    resource_type: 'raw', // For PDFs and other non-image files
+    allowed_formats: ['pdf'],
+    public_id: (req, file) => {
+      const { documentType } = req.body;
+      return `${documentType}_${Date.now()}`;
+    }
   }
 });
 
-// File filter - only PDF
-const fileFilter = (req, file, cb) => {
-  if (file.mimetype === 'application/pdf') {
-    cb(null, true);
-  } else {
-    cb(new Error('Only PDF files are allowed'), false);
-  }
-};
-
-// Configure multer
 const upload = multer({
   storage: storage,
-  fileFilter: fileFilter,
-  limits: {
-    fileSize: 10 * 1024 * 1024 // 10MB limit
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype === 'application/pdf') {
+      cb(null, true);
+    } else {
+      cb(new Error('Only PDF files are allowed'));
+    }
   }
 });
 

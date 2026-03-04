@@ -21,8 +21,8 @@ exports.uploadDocument = async (req, res) => {
       return res.status(404).json({ error: 'Client not found' });
     }
 
-    // Generate public URL
-    const fileUrl = `${process.env.BASE_URL}/${req.file.path.replace(/\\/g, '/')}`;
+    // Generate public URL from Cloudinary
+    const fileUrl = req.file.path; // Cloudinary automatically provides full URL
 
     const document = new Document({
       clientId,
