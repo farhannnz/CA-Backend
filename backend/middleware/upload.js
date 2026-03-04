@@ -18,10 +18,10 @@ const storage = new CloudinaryStorage({
       return `ca-documents/${req.userId}/${clientId}/${year}`;
     },
     resource_type: 'raw', // For PDFs and other non-image files
-    allowed_formats: ['pdf'],
+    format: 'pdf', // Add PDF format
     public_id: (req, file) => {
       const { documentType } = req.body;
-      return `${documentType}_${Date.now()}`;
+      return `${documentType}_${Date.now()}.pdf`; // Add .pdf extension here
     }
   }
 });
