@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard';
 import AddClient from './pages/AddClient';
 import UploadDocument from './pages/UploadDocument';
 import Clients from './pages/Clients';
+import ClientDetail from './pages/ClientDetail';
 import Navbar from './components/Navbar';
 
 function App() {
@@ -47,6 +48,10 @@ function App() {
           <Route 
             path="/clients" 
             element={isAuthenticated ? <Clients /> : <Navigate to="/login" />} 
+          />
+          <Route 
+            path="/client/:clientId" 
+            element={isAuthenticated ? <ClientDetail /> : <Navigate to="/login" />} 
           />
           <Route 
             path="/add-client" 

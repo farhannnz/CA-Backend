@@ -6,7 +6,7 @@ import './Clients.css';
 function Clients() {
   const [clients, setClients] = useState([]);
   const [documents, setDocuments] = useState([]);
-  const [selectedClient, setSelectedClient] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState('ALL');
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -61,6 +61,16 @@ function Clients() {
     }
   };
 
+  const handleClientClick = (clientId) => {
+    navigate(`/client/${clientId}`);
+  };
+
+  // Filter clients by search term
+  const filteredClients = clients.filter(client =>
+    client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    client.whatsappNumber.includes(searchTerm)
+  );
+
   const documentTypes = ['ALL', 'ITR', 'GST', 'TDS', 'BALANCE SHEET', 'AUDIT REPORT'];
 
   if (loading) {
@@ -71,24 +81,41 @@ function Clients() {
     <div className="clients-container">
       <div className="clients-header">
         <h1>📋 Client Management</h1>
-        <div className="filter-buttons">
-          {documentTypes.map(type => (
-            <button
-              key={type}
-              className={`filter-btn ${filter === type ? 'active' : ''}`}
-              onClick={() => setFilter(type)}
-            >
-              {type}
-            </button>
-          ))}
+        
+        <div className="search-filter-bar">
+          <div className="search-box">
+            <input
+              type="text"
+              placeholder="🔍 Search clients by name or phone..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="search-input"
+            />
+          </div>
+          
+          <div className="filter-buttons">
+            {documentTypes.map(type => (
+              <button
+                key={type}
+                className={`filter-btn ${filter === type ? 'active' : ''}`}
+                onClick={() => setFilter(type)}
+              >
+                {type}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
       <div className="clients-grid">
-        {clients.map(client => {
+        {filteredClients.map(client => {
           const clientDocs = getClientDocuments(client._id);
           return (
-            <div key={client._id} className="client-card">
+            <div 
+              key={client._id} 
+              className="client-card"
+              onClick={() => handleClientClick(client._id)}
+            >
               <div className="client-header">
                 <h3>👤 {client.name}</h3>
                 <span className="client-phone">📱 {client.whatsappNumber}</span>
@@ -100,48 +127,35 @@ function Clients() {
                 </span>
               </div>
 
-              <div className="documents-list">
+              <div className="client-preview">
                 {clientDocs.length === 0 ? (
                   <p className="no-docs">No documents uploaded yet</p>
                 ) : (
-                  clientDocs.map(doc => (
-                    <div key={doc._id} className="document-item">
-                      <div className="doc-info">
-                        <span className="doc-type">{doc.documentType}</span>
-                        <span className="doc-year">{doc.year}</span>
-                      </div>
-                      <div className="doc-actions">
-                        <a 
-                          href={doc.fileUrl} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="view-btn"
-                        >
-                          👁️ View
-                        </a>
-                        <button 
-                          onClick={() => handleDeleteDocument(doc._id)}
-                          className="delete-btn"
-                        >
-                          🗑️ Delete
-                        </button>
-                      </div>
-                    </div>
-                  ))
+                  <div className="doc-types">
+                    {[...new Set(clientDocs.map(d => d.documentType))].map(type => (
+                      <span key={type} className="doc-badge">{type}</span>
+                    ))}
+                  </div>
                 )}
+              </div>
+
+              <div className="card-footer">
+                <span className="view-details">View Details →</span>
               </div>
             </div>
           );
         })}
       </div>
 
-      {clients.length === 0 && (
+      {filteredClients.length === 0 && (
         <div className="empty-state">
-          <h2>No clients yet</h2>
-          <p>Add your first client to get started</p>
-          <button onClick={() => navigate('/add-client')} className="add-client-btn">
-            ➕ Add Client
-          </button>
+          <h2>No clients found</h2>
+          <p>{searchTerm ? 'Try a different search term' : 'Add your first client to get started'}</p>
+          {!searchTerm && (
+            <button onClick={() => navigate('/add-client')} className="add-client-btn">
+              ➕ Add Client
+            </button>
+          )}
         </div>
       )}
     </div>

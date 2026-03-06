@@ -13,6 +13,31 @@
   margin-bottom: 20px;
 }
 
+.search-filter-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.search-box {
+  width: 100%;
+}
+
+.search-input {
+  width: 100%;
+  padding: 15px 20px;
+  border: 2px solid #3498db;
+  border-radius: 12px;
+  font-size: 1em;
+  transition: all 0.3s;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #2980b9;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
 .filter-buttons {
   display: flex;
   gap: 10px;
@@ -51,11 +76,44 @@
   padding: 20px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
 }
 
 .client-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+
+.client-preview {
+  margin-bottom: 15px;
+}
+
+.doc-types {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.doc-badge {
+  background: #e8f4f8;
+  color: #3498db;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.85em;
+  font-weight: 600;
+}
+
+.card-footer {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #ecf0f1;
+  text-align: right;
+}
+
+.view-details {
+  color: #3498db;
+  font-weight: 600;
+  font-size: 0.9em;
 }
 
 .client-header {
