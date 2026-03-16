@@ -152,7 +152,30 @@ docker push <account-id>.dkr.ecr.ap-south-1.amazonaws.com/ca-backend:latest
 
 ---
 
-### 2.4 Frontend → AWS S3 + CloudFront
+### 2.4 Frontend Deployment Options
+
+#### Option A: Render (Recommended for Quick Start)
+
+**Setup:**
+
+1. **Push code to GitHub/GitLab**
+
+2. **Deploy on Render:**
+   - Go to https://render.com
+   - New → Static Site
+   - Connect your repository
+   - Build Command: `cd frontend && npm install && npm run build`
+   - Publish Directory: `frontend/build`
+   - Add Environment Variable: `REACT_APP_API_URL=https://ca-backend-cqed.onrender.com/api`
+
+3. **Auto-deploy on push:**
+   - Render automatically deploys on git push
+
+**Cost:**
+- Free tier available
+- Paid: $7/month for custom domain + CDN
+
+#### Option B: AWS S3 + CloudFront
 
 **Setup:**
 

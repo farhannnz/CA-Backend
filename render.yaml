@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: ca-frontend
+    env: static
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: ./frontend/build
+    envVars:
+      - key: REACT_APP_API_URL
+        value: https://ca-backend-cqed.onrender.com/api
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
