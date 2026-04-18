@@ -19,6 +19,7 @@ app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/clients', require('./routes/clientRoutes'));
 app.use('/api/documents', require('./routes/documentRoutes'));
 app.use('/api/webhook', require('./routes/webhookRoutes'));
+app.use('/api/lex-webhook', require('./routes/lexWebhookRoutes'));
 
 // Health check
 app.get('/', (req, res) => {
