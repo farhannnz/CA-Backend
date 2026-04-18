@@ -9,13 +9,30 @@ import UploadDocument from './pages/UploadDocument';
 import Clients from './pages/Clients';
 import ClientDetail from './pages/ClientDetail';
 import Navbar from './components/Navbar';
+import { getMe } from './api';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    setIsAuthenticated(!!token);
+    if (token) {
+      // Check if token is valid by making a test API call
+      const checkToken = async () => {
+        try {
+          await getMe(); // This will throw error if token is invalid
+          setIsAuthenticated(true);
+        } catch (error) {
+          // Token is invalid, clear it
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          setIsAuthenticated(false);
+        }
+      };
+      checkToken();
+    } else {
+      setIsAuthenticated(false);
+    }
   }, []);
 
   const handleLogin = () => {
