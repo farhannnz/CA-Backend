@@ -14,8 +14,8 @@ const documentSchema = new mongoose.Schema({
   documentType: {
     type: String,
     required: true,
-    enum: ['ITR', 'GST', 'AUDIT', 'TDS', 'OTHER'],
-    uppercase: true
+    trim: true
+    // Removed enum validation to allow flexible document types like TDS-JAN, GST-MAR etc.
   },
   fileUrl: {
     type: String,

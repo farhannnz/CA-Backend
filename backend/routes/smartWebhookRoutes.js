@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const smartWebhookController = require('../controllers/smartWebhookController');
+const newSmartWebhookController = require('../controllers/newSmartWebhookController');
 
-// Smart keyword-based WhatsApp webhook
-router.post('/', smartWebhookController.handleWhatsAppMessage);
+// New conversational WhatsApp webhook
+router.post('/', newSmartWebhookController.handleWhatsAppMessage);
 
 // Test endpoint
-router.get('/test', smartWebhookController.testWebhook);
+router.get('/test', newSmartWebhookController.testWebhook);
 
 module.exports = router;
