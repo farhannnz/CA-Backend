@@ -23,7 +23,7 @@ class LexWebhookController {
 
       // Find client by WhatsApp number
       const client = await this.findClientByNumber(fromNumber);
-      
+
       if (!client) {
         twiml.message('You are not registered. Please contact your CA.');
         return res.type('text/xml').send(twiml.toString());
@@ -59,8 +59,8 @@ class LexWebhookController {
 
   async processLexResponse(lexResponse, client, originalMessage) {
     const { intent, slots, message, sessionState, interpretations } = lexResponse;
-    
-    console.log('🎯 Processing intent:', intent, 'with confidence:', 
+
+    console.log('🎯 Processing intent:', intent, 'with confidence:',
       lexService.getIntentConfidence(interpretations, intent));
 
     // Check confidence threshold
@@ -73,17 +73,17 @@ class LexWebhookController {
     switch (intent) {
       case 'GetDocument':
         return await this.handleGetDocumentIntent(slots, client);
-      
+
       case 'ShowMenu':
       case 'Greeting':
         return this.getMainMenu(client);
-      
+
       case 'ContactConsultant':
         return this.getConsultantInfo(client);
-      
+
       case 'CheckPendingRequests':
         return await this.getPendingRequests(client);
-      
+
       default:
         console.log('🤷 Unknown intent, falling back to rule-based');
         return await this.processRuleBasedMessage(originalMessage, client);
@@ -102,7 +102,7 @@ class LexWebhookController {
 
     if (!year) {
       // Show available years for this document type
-      const docs = await Document.find({ 
+      const docs = await Document.find({
         clientId: client._id,
         documentType: documentType.toUpperCase()
       }).sort({ year: -1 });
@@ -165,7 +165,7 @@ Reply 'menu' to go back to main menu.`;
   }
 
   async getPendingRequests(client) {
-    const pendingRequests = await PendingRequest.find({ 
+    const pendingRequests = await PendingRequest.find({
       clientId: client._id,
       status: { $in: ['PENDING', 'IN_PROGRESS'] }
     });
@@ -231,9 +231,9 @@ Reply 'menu' to go back to main menu.`;
       });
 
       if (!document) {
-        const availableDocs = await Document.find({ 
+        const availableDocs = await Document.find({
           clientId: client._id,
-          documentType: documentType 
+          documentType: documentType
         });
 
         if (availableDocs.length > 0) {
@@ -256,7 +256,7 @@ Reply 'menu' to go back to main menu.`;
 
   async getIssuedDocuments(client) {
     const allDocs = await Document.find({ clientId: client._id });
-    
+
     if (allDocs.length === 0) {
       return `📄 Your Documents\n\nYou don't have any documents yet.\n\nReply 'menu' to go back.`;
     }
@@ -282,7 +282,7 @@ Reply 'menu' to go back to main menu.`;
   }
 
   async getDocumentsByType(documentType, client) {
-    const docs = await Document.find({ 
+    const docs = await Document.find({
       clientId: client._id,
       documentType: documentType.toUpperCase()
     }).sort({ year: -1 });
@@ -312,7 +312,7 @@ Reply 'menu' to go back to main menu.`;
 
   // Test endpoint
   testWebhook(req, res) {
-    res.json({ 
+    res.json({
       message: 'Lex-enhanced webhook is working',
       timestamp: new Date().toISOString(),
       lexConfigured: lexService.isConfigured(),

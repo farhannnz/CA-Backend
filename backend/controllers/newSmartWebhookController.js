@@ -6,6 +6,10 @@ class NewSmartWebhookController {
   constructor() {
     // Store conversation context per user
     this.userContexts = new Map();
+    
+    // Bind methods to preserve 'this' context
+    this.handleWhatsAppMessage = this.handleWhatsAppMessage.bind(this);
+    this.testWebhook = this.testWebhook.bind(this);
   }
 
   async handleWhatsAppMessage(req, res) {
@@ -24,10 +28,27 @@ class NewSmartWebhookController {
       }
 
       // Find client by WhatsApp number
+      console.log('🔍 Looking for client with number:', fromNumber);
       const client = await this.findClientByNumber(fromNumber);
+      console.log('👤 Client found:', client ? client.name : 'Not found');
       
       if (!client) {
-        twiml.message('You are not registered. Please contact your CA.');
+        console.log('❌ Client not registered for number:', fromNumber);
+        const helpMessage = `Hello! 👋
+
+You are not registered in our system yet.
+
+To get started:
+1️⃣ Contact your CA
+2️⃣ Ask them to add your WhatsApp number: ${fromNumber}
+3️⃣ Then you can access your documents here
+
+Your CA can add you through the dashboard at:
+https://your-ca-dashboard.com
+
+Need help? Contact your CA directly.`;
+        
+        twiml.message(helpMessage);
         return res.type('text/xml').send(twiml.toString());
       }
 
@@ -285,14 +306,37 @@ class NewSmartWebhookController {
 
   // Find client by number
   async findClientByNumber(fromNumber) {
-    const escapedNumber = fromNumber.replace(/[+\-()]/g, '\\$&');
-    return await Client.findOne({
-      $or: [
-        { whatsappNumber: fromNumber },
-        { whatsappNumber: `+${fromNumber}` },
-        { whatsappNumber: { $regex: escapedNumber, $options: 'i' } }
-      ]
-    }).populate('createdBy', 'name');
+    try {
+      console.log('🔍 Searching for client with number:', fromNumber);
+      
+      // Try different number formats
+      const searchNumbers = [
+        fromNumber,
+        `+${fromNumber}`,
+        fromNumber.replace('+', ''),
+        fromNumber.replace(/[^\d]/g, '') // Remove all non-digits
+      ];
+      
+      console.log('🔍 Trying these number formats:', searchNumbers);
+      
+      for (const number of searchNumbers) {
+        const client = await Client.findOne({
+          whatsappNumber: { $regex: number.replace(/[+\-()]/g, '\\$&'), $options: 'i' }
+        }).populate('createdBy', 'name');
+        
+        if (client) {
+          console.log('✅ Client found:', client.name, 'with number:', client.whatsappNumber);
+          return client;
+        }
+      }
+      
+      console.log('❌ No client found for any number format');
+      return null;
+      
+    } catch (error) {
+      console.error('❌ Error finding client:', error);
+      return null;
+    }
   }
 
   // Test endpoint
