@@ -3,7 +3,7 @@ const Client = require('../models/Client');
 // Add new client
 exports.addClient = async (req, res) => {
   try {
-    const { name, whatsappNumber } = req.body;
+    const { name, whatsappNumber, consultantPhone } = req.body;
 
     // Normalize WhatsApp number
     let normalizedNumber = whatsappNumber.trim();
@@ -11,9 +11,19 @@ exports.addClient = async (req, res) => {
       normalizedNumber = '+' + normalizedNumber;
     }
 
+    // Normalize consultant phone if provided
+    let normalizedConsultantPhone = '';
+    if (consultantPhone && consultantPhone.trim()) {
+      normalizedConsultantPhone = consultantPhone.trim();
+      if (!normalizedConsultantPhone.startsWith('+')) {
+        normalizedConsultantPhone = '+' + normalizedConsultantPhone;
+      }
+    }
+
     const client = new Client({
       name,
       whatsappNumber: normalizedNumber,
+      consultantPhone: normalizedConsultantPhone,
       createdBy: req.userId
     });
 
@@ -79,11 +89,35 @@ exports.deleteClient = async (req, res) => {
 // Update client
 exports.updateClient = async (req, res) => {
   try {
-    const { consultantPhone } = req.body;
+    const { name, whatsappNumber, consultantPhone } = req.body;
+
+    const updateData = {};
+
+    if (name) updateData.name = name.trim();
+
+    if (whatsappNumber) {
+      let normalizedNumber = whatsappNumber.trim();
+      if (!normalizedNumber.startsWith('+')) {
+        normalizedNumber = '+' + normalizedNumber;
+      }
+      updateData.whatsappNumber = normalizedNumber;
+    }
+
+    if (consultantPhone !== undefined) {
+      if (consultantPhone && consultantPhone.trim()) {
+        let normalizedConsultantPhone = consultantPhone.trim();
+        if (!normalizedConsultantPhone.startsWith('+')) {
+          normalizedConsultantPhone = '+' + normalizedConsultantPhone;
+        }
+        updateData.consultantPhone = normalizedConsultantPhone;
+      } else {
+        updateData.consultantPhone = '';
+      }
+    }
 
     const client = await Client.findOneAndUpdate(
       { _id: req.params.id, createdBy: req.userId },
-      { consultantPhone },
+      updateData,
       { new: true }
     );
 

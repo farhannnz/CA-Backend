@@ -108,7 +108,19 @@ class LexWebhookController {
       }).sort({ year: -1 });
 
       if (docs.length === 0) {
-        return `No ${documentType} documents found. Reply 'menu' to see other options.`;
+        // Show apology with consultant contact info
+        const consultantPhone = client.consultantPhone || 'Not available';
+        const consultantInfo = consultantPhone !== 'Not available' 
+          ? `\n📞 Contact your CA: ${consultantPhone}\nCA: ${client.createdBy?.name || 'N/A'}`
+          : `\n📞 Contact your CA: ${client.createdBy?.name || 'N/A'}`;
+
+        return `❌ Sorry, no ${documentType} documents are available yet.
+
+These documents may not be filed or uploaded yet.${consultantInfo}
+
+You can contact your CA for more information.
+
+Reply 'menu' to see other options.`;
       }
 
       let response = `📄 Available ${documentType} documents:\n\n`;
@@ -127,7 +139,19 @@ class LexWebhookController {
     });
 
     if (!document) {
-      return `${documentType} for ${year} not found. Reply 'menu' to see available options.`;
+      // Show apology with consultant contact info
+      const consultantPhone = client.consultantPhone || 'Not available';
+      const consultantInfo = consultantPhone !== 'Not available' 
+        ? `\n📞 Contact your CA: ${consultantPhone}\nCA: ${client.createdBy?.name || 'N/A'}`
+        : `\n📞 Contact your CA: ${client.createdBy?.name || 'N/A'}`;
+
+      return `❌ Sorry, ${documentType} for ${year} is not available yet.
+
+This document may not be filed or uploaded yet.${consultantInfo}
+
+You can contact your CA for more information.
+
+Reply 'menu' to see available options.`;
     }
 
     return `📄 ${documentType} ${year}\n\n${document.fileUrl}\n\nReply 'menu' for main menu`;

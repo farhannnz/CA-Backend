@@ -126,9 +126,30 @@ class SmartWebhookController {
             return null; // No document keywords found
         }
 
-        // Extract year if present
+        // Extract year with smart mapping
         const yearMatch = message.match(/\b(20\d{2}[-\/]?\d{0,2}|\d{4}[-\/]\d{2})\b/);
-        const year = yearMatch ? yearMatch[0] : null;
+        let year = null;
+
+        if (yearMatch) {
+            let extractedYear = yearMatch[0];
+
+            // Smart year mapping: if user says just "2025", map to "2025-26"
+            if (extractedYear === '2025') {
+                year = '2025-26';
+                console.log('✅ Mapped 2025 to 2025-26');
+            } else if (extractedYear === '2024') {
+                year = '2024-25';
+                console.log('✅ Mapped 2024 to 2024-25');
+            } else if (extractedYear === '2023') {
+                year = '2023-24';
+                console.log('✅ Mapped 2023 to 2023-24');
+            } else if (extractedYear === '2022') {
+                year = '2022-23';
+                console.log('✅ Mapped 2022 to 2022-23');
+            } else {
+                year = extractedYear;
+            }
+        }
 
         console.log('🔍 Matched types:', matchedTypes, 'Year:', year);
 
@@ -136,10 +157,73 @@ class SmartWebhookController {
         let allMatchedDocs = [];
 
         for (const docType of matchedTypes) {
+            // Check for month keywords for GST/TDS
+            let month = null;
+            let quarter = null;
+
+            if (docType === 'GST' || docType === 'TDS') {
+                // Month mapping
+                const monthKeywords = {
+                    'JAN': ['jan', 'january'],
+                    'FEB': ['feb', 'february'],
+                    'MAR': ['mar', 'march'],
+                    'APR': ['apr', 'april'],
+                    'MAY': ['may'],
+                    'JUN': ['jun', 'june'],
+                    'JUL': ['jul', 'july'],
+                    'AUG': ['aug', 'august'],
+                    'SEP': ['sep', 'september'],
+                    'OCT': ['oct', 'october'],
+                    'NOV': ['nov', 'november'],
+                    'DEC': ['dec', 'december']
+                };
+
+                // Quarter mapping
+                const quarterKeywords = {
+                    'Q1': ['q1', 'quarter 1', 'first quarter'],
+                    'Q2': ['q2', 'quarter 2', 'second quarter'],
+                    'Q3': ['q3', 'quarter 3', 'third quarter'],
+                    'Q4': ['q4', 'quarter 4', 'fourth quarter']
+                };
+
+                // Check for month
+                for (const [monthCode, keywords] of Object.entries(monthKeywords)) {
+                    if (keywords.some(keyword => message.toLowerCase().includes(keyword))) {
+                        month = monthCode;
+                        console.log('✅ Found month:', monthCode);
+                        break;
+                    }
+                }
+
+                // Check for quarter if no month found
+                if (!month) {
+                    for (const [quarterCode, keywords] of Object.entries(quarterKeywords)) {
+                        if (keywords.some(keyword => message.toLowerCase().includes(keyword))) {
+                            quarter = quarterCode;
+                            console.log('✅ Found quarter:', quarterCode);
+                            break;
+                        }
+                    }
+                }
+            }
+
             const query = {
-                clientId: client._id,
-                documentType: docType
+                clientId: client._id
             };
+
+            // Build document type query
+            if ((docType === 'GST' || docType === 'TDS')) {
+                if (month) {
+                    query.documentType = `${docType}-${month}`;
+                } else if (quarter) {
+                    query.documentType = `${docType}-${quarter}`;
+                } else {
+                    // If no specific month/quarter, search for all variants
+                    query.documentType = { $regex: `^${docType}`, $options: 'i' };
+                }
+            } else {
+                query.documentType = docType;
+            }
 
             if (year) {
                 query.year = year;
@@ -150,10 +234,28 @@ class SmartWebhookController {
         }
 
         if (allMatchedDocs.length === 0) {
+            // Show apology with consultant contact info
+            const consultantPhone = client.consultantPhone || 'Not available';
+            const consultantInfo = consultantPhone !== 'Not available' 
+                ? `\n📞 Contact your CA: ${consultantPhone}\nCA: ${client.createdBy?.name || 'N/A'}`
+                : `\n📞 Contact your CA: ${client.createdBy?.name || 'N/A'}`;
+
             if (year) {
-                return `No ${matchedTypes.join(' or ')} documents found for ${year}.\n\nReply 'menu' to see other options.`;
+                return `❌ Sorry, no ${matchedTypes.join(' or ')} documents are available for ${year} yet.
+
+This document may not be filed or uploaded yet.${consultantInfo}
+
+You can contact your CA for more information.
+
+Reply 'menu' to see other options.`;
             } else {
-                return `No ${matchedTypes.join(' or ')} documents found.\n\nReply 'menu' to see other options.`;
+                return `❌ Sorry, no ${matchedTypes.join(' or ')} documents are available yet.
+
+These documents may not be filed or uploaded yet.${consultantInfo}
+
+You can contact your CA for more information.
+
+Reply 'menu' to see other options.`;
             }
         }
 
@@ -222,7 +324,21 @@ Reply 'menu' to go back to main menu.`;
         const allDocs = await Document.find({ clientId: client._id }).sort({ documentType: 1, year: -1 });
 
         if (allDocs.length === 0) {
-            return `📄 Your Documents\n\nYou don't have any documents yet.\n\nReply 'menu' to go back.`;
+            // Show apology with consultant contact info
+            const consultantPhone = client.consultantPhone || 'Not available';
+            const consultantInfo = consultantPhone !== 'Not available' 
+                ? `\n📞 Contact your CA: ${consultantPhone}\nCA: ${client.createdBy?.name || 'N/A'}`
+                : `\n📞 Contact your CA: ${client.createdBy?.name || 'N/A'}`;
+
+            return `📄 Your Documents
+
+❌ Sorry, no documents are available yet.
+
+Your documents may not be uploaded yet.${consultantInfo}
+
+You can contact your CA to check on your document status.
+
+Reply 'menu' to go back.`;
         }
 
         // Group documents by type
@@ -287,7 +403,19 @@ Reply 'menu' to go back to main menu.`;
             }).sort({ year: -1 });
 
             if (docs.length === 0) {
-                return `No ${matchedType} documents found.\n\nReply 'menu' to go back.`;
+                // Show apology with consultant contact info
+                const consultantPhone = client.consultantPhone || 'Not available';
+                const consultantInfo = consultantPhone !== 'Not available' 
+                    ? `\n📞 Contact your CA: ${consultantPhone}\nCA: ${client.createdBy?.name || 'N/A'}`
+                    : `\n📞 Contact your CA: ${client.createdBy?.name || 'N/A'}`;
+
+                return `❌ Sorry, no ${matchedType} documents are available yet.
+
+These documents may not be filed or uploaded yet.${consultantInfo}
+
+You can contact your CA for more information.
+
+Reply 'menu' to go back.`;
             }
 
             let response = `📄 ${matchedType} Documents\n\n`;
@@ -317,14 +445,26 @@ Reply 'menu' to go back to main menu.`;
                 });
 
                 if (availableDocs.length > 0) {
-                    let response = `${documentType} for ${year} not found.\n\nAvailable ${documentType} documents:\n\n`;
+                    let response = `❌ Sorry, ${documentType} for ${year} is not available yet.\n\nAvailable ${documentType} documents:\n\n`;
                     availableDocs.forEach(doc => {
                         response += `📄 ${doc.year}\n`;
                     });
                     response += `\nReply 'menu' to go back`;
                     return response;
                 } else {
-                    return `${documentType} for ${year} not filed yet.\n\nReply 'menu' to go back.`;
+                    // Show apology with consultant contact info
+                    const consultantPhone = client.consultantPhone || 'Not available';
+                    const consultantInfo = consultantPhone !== 'Not available' 
+                        ? `\n📞 Contact your CA: ${consultantPhone}\nCA: ${client.createdBy?.name || 'N/A'}`
+                        : `\n📞 Contact your CA: ${client.createdBy?.name || 'N/A'}`;
+
+                    return `❌ Sorry, ${documentType} for ${year} is not available yet.
+
+This document may not be filed or uploaded yet.${consultantInfo}
+
+You can contact your CA for more information.
+
+Reply 'menu' to go back.`;
                 }
             }
 
